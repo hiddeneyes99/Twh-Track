@@ -15,7 +15,7 @@ app.use(cors());
 app.set("view engine", "ejs");
 
 //Modify your URL here
-var hostURL="https://trackdown-1e78.onrender.com";
+var hostURL="https://twh-track.onrender.com";
 //TOGGLE for Shorters
 var use1pt=false;
 
