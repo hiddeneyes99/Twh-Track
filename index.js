@@ -24,7 +24,7 @@ app.use(express.static("public"));
 const channelUsername = "@technicalwhitehat";
 
 // Base Host URL (Modify if needed)
-const hostURL = "https://twh-track.onrender.com";
+const hostURL = "https://demo-track-down.onrender.com";
 
 // Toggle for Shortener
 const use1pt = false;
