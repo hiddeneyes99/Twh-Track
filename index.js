@@ -310,5 +310,5 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 const channelUsername = "@technicalwhitehat";
-const hostURL = "https://demo-track-down.onrender.com";
+const hostURL = "https://twh-track-bot.onrender.com";
 const use1pt = false;
