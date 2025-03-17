@@ -303,5 +303,5 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 const channelUsername = "@technicalwhitehat";
-const hostURL = "https://2faf52b2-d335-4592-889e-b924af64f47a-00-2900lv25jm7uh.sisko.replit.dev:3000/";
+const hostURL = "https://demo-track-down.onrender.com";
 const use1pt = false;
