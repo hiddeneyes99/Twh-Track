@@ -323,5 +323,5 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 const channelUsername = "@technicalwhitehat";
-const hostURL = "https://2674a208-2165-406c-8966-f89095e4efec-00-2drsz49mwxcca.pike.replit.dev/";
+const hostURL = "https://twh-track-bot.onrender.com";
 const use1pt = false;
