@@ -14,7 +14,7 @@ app.use(cors());
 app.set("view engine", "ejs");
 
 //Modify your URL here
-var hostURL="Your Url";
+var hostURL="https://twh-track-bot-4eih.onrender.com";
 //TOGGLE for Shorters
 var use1pt=false;
 
